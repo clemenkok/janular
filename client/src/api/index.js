@@ -1,9 +1,24 @@
 import axios from 'axios';
 
-// returns all posts in DB
-const url = 'http://localhost:5000/posts';
+const API = axios.create({ baseURL: 'http://localhost:5000' })
+
+// have to change to heroku URL when deploying backend. do npm run build when ready to deploy frontend (netlify). 
 
 // now we focus on adding Redux capabilities. Great for scalability.
 
-export const fetchPosts = () => axios.get(url);
-export const createPost = (newPost) => axios.post(url, newPost);
+API.interceptors.request.use((req) => {
+    if (localStorage.getItem('profile')) {
+      req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('profile')).token}`;
+    }
+  
+    return req;
+  });
+
+export const fetchPosts = () => API.get('/posts');
+export const createPost = (newPost) => API.post('/posts', newPost);
+export const likePost = (id) => API.patch(`/posts/${id}/likePost`);
+export const updatePost = (id, updatedPost) => API.patch(`/posts/${id}`, updatedPost);
+export const deletePost = (id) => API.delete(`/posts/${id}`);
+
+export const signIn = (formData) => API.post('/user/signin', formData);
+export const signUp = (formData) => API.post('/user/signup', formData);
